@@ -1,0 +1,58 @@
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import org.json.JSONObject;
+
+public class WeatherApp {
+
+    // Replace with your OpenWeatherMap API key
+    private static final String API_KEY = "YOUR_API_KEY_HERE";
+    private static final String CITY = "Hyderabad";
+    private static final String API_URL =
+            "https://api.openweathermap.org/data/2.5/weather?q="
+                    + CITY + "&appid=" + API_KEY + "&units=metric";
+
+    public static void main(String[] args) {
+
+        try {
+            // Create HTTP client
+            HttpClient client = HttpClient.newHttpClient();
+
+            // Create HTTP request
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(API_URL))
+                    .GET()
+                    .build();
+
+            // Send request and receive response
+            HttpResponse<String> response =
+                    client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // Parse JSON response
+            JSONObject json = new JSONObject(response.body());
+
+            // Extract data
+            String cityName = json.getString("name");
+            JSONObject main = json.getJSONObject("main");
+            JSONObject weather = json.getJSONArray("weather").getJSONObject(0);
+
+            double temperature = main.getDouble("temp");
+            int humidity = main.getInt("humidity");
+            String description = weather.getString("description");
+
+            // Display structured output
+            System.out.println("===== Weather Report =====");
+            System.out.println("City        : " + cityName);
+            System.out.println("Temperature : " + temperature + " °C");
+            System.out.println("Humidity    : " + humidity + " %");
+            System.out.println("Condition   : " + description);
+            System.out.println("==========================");
+
+        } catch (Exception e) {
+            System.out.println("Error fetching weather data");
+            e.printStackTrace();
+        }
+    }
+}
